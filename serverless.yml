@@ -1,0 +1,73 @@
+service: serverless
+
+provider:
+  name: aws
+  runtime: nodejs12.x  
+  apiGateway:
+    shouldStartNameWithService: true
+  # profile: femasters
+  region: eu-west-1
+  stage: dev
+
+functions:
+  hello:
+    handler: src/api.handler
+  api:
+    handler: src/api.handler
+    events:
+      - http: GET /api 
+
+  apiWithParams:
+    handler: src/api.handler
+    events:
+      - http: 
+          method: GET
+          path: /apiWithParams/{name}
+
+
+  apiWithBodyParams:
+    handler: src/api.handler
+    events:
+      - http: 
+          method: GET
+          path: /apiWithBodyParams
+          integration: lambda
+          request:
+            template:            
+              application/json: '{ "aa" : "MohitGupta" }'
+
+
+  apiWithPOST:
+    handler: src/apiWithPOST.handler
+    events:
+      - http: 
+          method: POST
+          path: /apiWithPOST/{userId}
+          integration: lambda
+          request:           
+            parameters:
+              querystrings:
+                url: true
+              headers:
+                custom-header:
+                  required: true
+                  mappedValue1: context.requestId
+                  mappedValue2: context.UserLdap
+              paths:
+                userId: true
+# http://localhost:4500/apiWithPOST/
+# Notice, here we are passing values in Header as well as QueryString/Path parameter
+
+
+  apiRouteWithExpressRoute:
+    handler: src/apiRouteWithExpressRoute.handler
+    events:
+      - http: ANY /apiRouteWithExpressRoute
+      - http: 'ANY /apiRouteWithExpressRoute/{param+}'
+
+      # {param+} means anything after apiRouteWithExpressRoute and ANY means any Verb like Put, Post, etc
+
+plugins:
+  - serverless-offline
+
+    
